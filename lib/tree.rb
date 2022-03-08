@@ -39,10 +39,53 @@ class Tree
       insert(value, node.left)
     end
   end
+
+  def delete(value, node = @root, parent = nil, direction = '')
+    return if node.nil?
+
+    if value == @root.data
+      return @root = Node.new(node.right.data, node.left, node.right.right)
+    end
+
+    if value < node.data
+      delete(value, node.left, node, 'left')
+    elsif value > node.data
+      delete(value, node.right, node, 'right')
+    elsif node.right.nil? && node.left.nil?
+      if direction == 'left'
+        parent.left = nil
+      else
+        parent.right = nil
+      end
+    elsif node.left.nil?
+      if direction == 'left'
+        parent.left = node.right
+      else
+        parent.right = node.right
+      end
+    elsif node.right.nil?
+      if direction == 'left'
+        parent.left = node.left
+      else
+        parent.right = node.left
+      end
+    else
+      if direction == 'left'
+        parent.left = Node.new(node.right.data, node.left)
+      else
+        parent.right = Node.new(node.right.data, node.left)
+      end
+    end
+  end
+
+  def pretty_print(node = @root, prefix = '', is_left = true)
+    pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
+    puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
+    pretty_print(node.left, "#{prefix}#{is_left ? '    ' : '│   '}", true) if node.left
+  end
 end
 
-tree = Tree.new([1, 2, 3, 4, 5])
-tree.insert(5)
-p tree.root
-puts tree.root
- 
+tree = Tree.new([1, 2, 3, 4, 5, 6, 7])
+tree.pretty_print
+tree.delete(4)
+tree.pretty_print

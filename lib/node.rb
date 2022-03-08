@@ -6,13 +6,9 @@ class Node
   attr_reader :data
   attr_accessor :right, :left
 
-  def initialize(data)
+  def initialize(data, left = nil, right = nil)
     @data = data
-    @left = nil
-    @right = nil
-  end
-
-  def to_s
-    "  #{@data}\n#{@left}   #{right}"
+    @left = left
+    @right = right
   end
 end
