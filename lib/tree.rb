@@ -69,6 +69,8 @@ class Tree
   end
 
   def find(value, node = @root)
+    return nil if node.nil?
+
     if value < node.data
       find(value, node.left)
     elsif value > node.data
@@ -118,6 +120,76 @@ class Tree
     level_order_recursion(queue, nodes, values, &block)
   end
 
+  def inorder(node = @root, nodes = [], &block)
+    # visit left, then root, then right
+    return nodes if node.nil?
+
+    inorder(node.left, nodes, &block)
+    block_given? ? yield(node) : nodes << node.data
+    inorder(node.right, nodes, &block)
+  end
+
+  def preorder(node = @root, nodes = [], &block)
+    #visit root, then left, then right
+    return nodes if node.nil?
+
+    block_given? ? yield(node) : nodes << node.data
+    preorder(node.left, nodes, &block)
+    preorder(node.right, nodes, &block)
+  end
+
+  def postorder(node = @root, nodes = [], &block)
+    return nodes if node.nil?
+
+    postorder(node.left, nodes, &block)
+    postorder(node.right, nodes, &block)
+    block_given? ? yield(node) : nodes << node.data
+  end
+
+  def height(node, height = -1)
+    return height if node.nil?
+
+    left_h = height(node.left, height + 1)
+    right_h = height(node.right, height + 1)
+    left_h > right_h ? left_h : right_h
+  end
+
+  def depth(node)
+    return 'Can\'t find node' if node.nil?
+
+    value = node.data
+    depth = 0
+    root = @root
+    until root.nil?
+      if value < root.data
+        depth += 1
+        root = root.left
+      elsif value > root.data
+        root = root.right
+        depth += 1
+      else
+        return depth
+      end
+    end
+  end
+
+  def balanced?
+    left_h = height(@root.left)
+    right_h = height(@root.right)
+    case left_h - right_h
+    when 0, 1, -1
+      true
+    else
+      false
+    end
+  end
+
+  def rebalance
+    return if self.balanced? == true
+
+    Tree.new(self.inorder)
+  end
+
   def pretty_print(node = @root, prefix = '', is_left = true)
     pretty_print(node.right, "#{prefix}#{is_left ? '│   ' : '    '}", false) if node.right
     puts "#{prefix}#{is_left ? '└── ' : '┌── '}#{node.data}"
@@ -125,13 +197,30 @@ class Tree
   end
 end
 
-tree = Tree.new([1, 2, 3, 4, 5, 6, 7])
-tree.pretty_print
-tree.insert(8)
-tree.delete(4)
-tree.pretty_print
-p tree.find(6)
-p tree.level_order
-tree.level_order { |node| puts node.data }
-p tree.level_order_recursion
-tree.level_order_recursion { |node| puts node.data }
+# tree = Tree.new([1, 2, 3, 4, 5, 6])
+# tree.pretty_print
+# tree.insert(8)
+# tree.insert(9)
+# tree.insert(10)
+# tree.insert(11)
+# tree.delete(9)
+# tree.delete(4)
+# tree.pretty_print
+# p tree.find(5)
+# p tree.level_order
+# my_lambda = ->(node) { puts node.data }
+# tree.level_order { my_lambda }
+# p tree.level_order_recursion
+# tree.level_order_recursion { my_lambda }
+# p tree.inorder
+# tree.inorder { my_lambda }
+# p tree.preorder
+# tree.preorder { my_lambda }
+# p tree.postorder
+# tree.preorder { my_lambda }
+# tree.pretty_print
+# puts tree.height(tree.find(4))
+# puts tree.depth(tree.find(8))
+# puts tree.balanced?
+# tree = tree.rebalance
+# tree.pretty_print
