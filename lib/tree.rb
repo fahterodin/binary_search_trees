@@ -78,11 +78,44 @@ class Tree
     end
   end
 
-  def level_order(&block)
-    # traverse the three in breadth-first level order and yeld each node to the block
+  def level_order
+    # traverse the tree in breadth-first level order and yield each node to the block
     # if no block is given it should return an array of values of all the nodes passed
-    # we also have a queue array
+    # use a queue array
     # iteration and recursion possible
+    nodes = []
+    queue = [@root]
+    until queue.empty?
+      nodes << queue[0]
+      queue.push(queue[0].left) unless queue[0].left.nil?
+      queue.push(queue[0].right) unless queue[0].right.nil?
+      queue.shift
+    end
+
+    if block_given?
+      nodes.each { |node| yield(node) }
+    else
+      values = []
+      nodes.each { |node| values << node.data }
+      values
+    end
+  end
+
+  def level_order_recursion(queue = [@root], nodes = [], values = [], &block)
+    return values if queue.empty? && !block_given?
+
+    return if queue.empty?
+
+    if block_given?
+      yield(queue[0])
+    else
+      values << queue[0].data
+    end
+
+    queue.push(queue[0].left) unless queue[0].left.nil?
+    queue.push(queue[0].right) unless queue[0].right.nil?
+    queue.shift
+    level_order_recursion(queue, nodes, values, &block)
   end
 
   def pretty_print(node = @root, prefix = '', is_left = true)
@@ -94,6 +127,11 @@ end
 
 tree = Tree.new([1, 2, 3, 4, 5, 6, 7])
 tree.pretty_print
+tree.insert(8)
 tree.delete(4)
 tree.pretty_print
 p tree.find(6)
+p tree.level_order
+tree.level_order { |node| puts node.data }
+p tree.level_order_recursion
+tree.level_order_recursion { |node| puts node.data }
